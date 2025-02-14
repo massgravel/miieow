@@ -256,6 +256,7 @@ MwCtl(_In_ PDEVICE_OBJECT pDeviceObject, _In_ PIRP pIrp)
 	}
 
 Cleanup:
+	if (pTargetProcess != NULL) ObDereferenceObject(pTargetProcess);
 	pIrp->IoStatus.Status = Status;
 	IoCompleteRequest(pIrp, IO_NO_INCREMENT);
 	return Status;
