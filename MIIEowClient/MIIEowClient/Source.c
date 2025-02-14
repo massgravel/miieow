@@ -256,7 +256,7 @@ int main()
 	printf("[+] Set protection to RWX\n");
 
 	const BYTE Patch[PATCH_SZ] = PATCH;
-	MwcWriteProcessMemory(pMIIEow, PatchAddr, 4, Patch);
+	MwcWriteProcessMemory(pMIIEow, PatchAddr, PATCH_SZ, Patch);
 	printf("[+] Patched\n");
 
 	ULONG _;
