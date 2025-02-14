@@ -1,0 +1,47 @@
+name: Build driver
+on:
+  push:
+    branches:
+      - trunk
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x64]
+    runs-on: windows-2022
+    env:
+      Driver_Solution_Path: MIIEow\MIIEow\MIIEow.sln
+      Client_Solution_Path: MIIEowClient\MIIEowClient\MIIEowClient.sln
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Build solutions
+        run: |
+          msbuild ${{ env.Driver_Solution_Path }} -p:Configuration=${{ env.Configuration }} -p:Platform=${{ env.Platform }}
+          msbuild ${{ env.Client_Solution_Path }} -p:Configuration=${{ env.Configuration }} -p:Platform=${{ env.Platform }}
+        env:
+          Configuration: ${{ matrix.configuration }}
+          Platform: ${{ matrix.platform }}
+
+      - name: Package
+        run: |
+          mkdir ${{ env.Configuration }}_${{ env.Platform }}/
+          xcopy /e /k /h /i MIIEow\MIIEow\${{ env.Platform }}\${{ env.Configuration }} ${{ env.Configuration }}_${{ env.Platform }}/
+          xcopy /e /k /h /i MIIEowClient\MIIEowClient\${{ env.Platform }}\${{ env.Configuration }} ${{ env.Configuration }}_${{ env.Platform }}/
+        env:
+          Configuration: ${{ matrix.configuration }}
+          Platform: ${{ matrix.platform }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: miieow_${{ github.sha }}_${{ env.Configuration }}_${{ env.Platform }}
+          path: ${{ env.Configuration }}_${{ env.Platform }}
+        env:
+          Configuration: ${{ matrix.configuration }}
+          Platform: ${{ matrix.platform }}
